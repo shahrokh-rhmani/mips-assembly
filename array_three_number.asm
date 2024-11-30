@@ -1,79 +1,72 @@
 .data
-array: .word 9, 2, 6  # نمونه آرایه سه عنصری
-n: .word 3  # تعداد عناصر آرایه
-comma: .asciiz ", "  # کاما برای جدا کردن اعداد
-newline: .asciiz "\n"  # کاراکتر newline برای قالب‌بندی
+array: .word 9, 2, 6
+n: .word 3
+comma: .asciiz ", "
+newline: .asciiz "\n"
 
 .text
 .globl main
 
 main:
-    # چاپ عناصر آرایه قبل از مرتب‌سازی
-    lw $t0, n  # بارگذاری تعداد عناصر آرایه در $t0
-    la $t1, array  # بارگذاری آدرس پایه آرایه در $t1
-    li $t2, 0  # مقداردهی اولیه شمارنده به 0
+    lw $t0, n
+    la $t1, array
+    li $t2, 0
 
 print_loop:
-    beq $t2, $t0, end_print  # اگر به انتهای آرایه رسیدیم، پایان چاپ
-    lw $a0, 0($t1)  # بارگذاری عنصر فعلی آرایه در $a0
-    li $v0, 1  # کد سیستم‌کال برای چاپ عدد صحیح
+    beq $t2, $t0, end_print
+    lw $a0, 0($t1)
+    li $v0, 1
     syscall
 
-    addi $t1, $t1, 4  # حرکت به عنصر بعدی آرایه
-    addi $t2, $t2, 1  # افزایش شمارنده
+    addi $t1, $t1, 4
+    addi $t2, $t2, 1
 
-    bge $t2, $t0, end_comma  # اگر به انتهای آرایه رسیدیم، چاپ کاما پایان یابد
+    bge $t2, $t0, end_comma
     la $a0, comma
     li $v0, 4
     syscall
 end_comma:
-    j print_loop  # ادامه چاپ
+    j print_loop
 
 end_print:
-    # چاپ newline
     la $a0, newline
     li $v0, 4
     syscall
 
-    # اجرای مرتب‌سازی سریع
-    la $a0, array  # آدرس پایه آرایه
-    li $a1, 0  # اندیس شروع
-    lw $a2, n  # تعداد عناصر آرایه
-    sub $a2, $a2, 1  # اندیس پایان
+    la $a0, array
+    li $a1, 0
+    lw $a2, n
+    sub $a2, $a2, 1
     jal quicksort
 
-    # چاپ عناصر آرایه بعد از مرتب‌سازی
-    lw $t0, n  # بارگذاری تعداد عناصر آرایه در $t0
-    la $t1, array  # بارگذاری آدرس پایه آرایه در $t1
-    li $t2, 0  # مقداردهی اولیه شمارنده به 0
+    lw $t0, n
+    la $t1, array
+    li $t2, 0
 
 print_sorted_loop:
-    beq $t2, $t0, end_print_sorted  # اگر به انتهای آرایه رسیدیم، پایان چاپ
-    lw $a0, 0($t1)  # بارگذاری عنصر فعلی آرایه در $a0
-    li $v0, 1  # کد سیستم‌کال برای چاپ عدد صحیح
+    beq $t2, $t0, end_print_sorted
+    lw $a0, 0($t1)
+    li $v0, 1
     syscall
 
-    addi $t1, $t1, 4  # حرکت به عنصر بعدی آرایه
-    addi $t2, $t2, 1  # افزایش شمارنده
+    addi $t1, $t1, 4
+    addi $t2, $t2, 1
 
-    bge $t2, $t0, end_comma_sorted  # اگر به انتهای آرایه رسیدیم، چاپ کاما پایان یابد
+    bge $t2, $t0, end_comma_sorted
     la $a0, comma
     li $v0, 4
     syscall
 end_comma_sorted:
-    j print_sorted_loop  # ادامه چاپ
+    j print_sorted_loop
 
 end_print_sorted:
-    # چاپ newline
     la $a0, newline
     li $v0, 4
     syscall
 
-    # خروج از برنامه
     li $v0, 10
     syscall
 
-# تابع quicksort
 quicksort:
     addi $sp, $sp, -24
     sw $ra, 20($sp)
@@ -82,17 +75,15 @@ quicksort:
     sw $a2, 8($sp)
     sw $a3, 4($sp)
 
-    bge $a1, $a2, quicksort_done  # اگر start >= end باشد، پایان بازگشت
+    bge $a1, $a2, quicksort_done
 
-    # تقسیم آرایه
-    move $t0, $a1  # i = start
-    move $t1, $a2  # j = end
-    sll $t2, $a1, 2  # i * 4
-    add $t2, $a0, $t2  # array[i]
-    lw $t3, 0($t2)  # pivot = array[start]
+    move $t0, $a1
+    move $t1, $a2
+    sll $t2, $a1, 2
+    add $t2, $a0, $t2
+    lw $t3, 0($t2)
 
 partition_loop:
-    # پیدا کردن عنصری که >= pivot باشد
 partition_left:
     sll $t4, $t0, 2
     add $t5, $a0, $t4
@@ -102,7 +93,6 @@ partition_left:
     j partition_left
 partition_left_done:
 
-    # پیدا کردن عنصری که <= pivot باشد
 partition_right:
     sll $t7, $t1, 2
     add $t8, $a0, $t7
@@ -112,36 +102,31 @@ partition_right:
     j partition_right
 partition_right_done:
 
-    ble $t0, $t1, swap  # تعویض array[i] و array[j]
-
-    # بررسی اگر i از j عبور کرده باشد
+    ble $t0, $t1, swap
     bgt $t0, $t1, partition_done
 
 swap:
-    # تعویض array[i] و array[j]
     sll $t4, $t0, 2
     add $t5, $a0, $t4
-    lw $t6, 0($t5)  # بارگذاری array[i]
+    lw $t6, 0($t5)
 
     sll $t7, $t1, 2
     add $t8, $a0, $t7
-    lw $t9, 0($t8)  # بارگذاری array[j]
+    lw $t9, 0($t8)
 
-    sw $t9, 0($t5)  # جایگزینی array[j] در array[i]
-    sw $t6, 0($t8)  # جایگزینی array[i] در array[j]
+    sw $t9, 0($t5)
+    sw $t6, 0($t8)
 
-    addi $t0, $t0, 1  # i++
-    subi $t1, $t1, 1  # j--
+    addi $t0, $t0, 1
+    subi $t1, $t1, 1
     j partition_loop
 
 partition_done:
-    # مرتب‌سازی زیرآرایه چپ
-    move $a2, $t1         # پایان زیرآرایه چپ = j
+    move $a2, $t1
     jal quicksort
 
-    # مرتب‌سازی زیرآرایه راست
-    move $a1, $t0         # شروع زیرآرایه راست = i
-    lw $a2, 8($sp)        # مقدار اصلی پایان را بازیابی کنید
+    move $a1, $t0
+    lw $a2, 8($sp)
     jal quicksort
 
 quicksort_done:
