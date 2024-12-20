@@ -1,172 +1,139 @@
 .data
-array: .word 15, 3, 8, 1, 9, 6  # Sample array
-n: .word 6  # Number of elements in the array
-comma: .asciiz ", "  # Comma for separating numbers
-newline: .asciiz "\n"  # Newline character for formatting
+array: .word 15, 3, 8, 1, 9, 6       # Define an array with initial values
+n: .word 6                           # Define n as the size of the array
+comma: .asciiz ", "                  # Define a comma string
+newline: .asciiz "\n"                # Define a newline string
 
 .text
 .globl main
 
 main:
-    # Load the number of elements into $t0
-    lw $t0, n
-    # Load the base address of the array into $t1
-    la $t1, array
-    # Initialize the counter to 0
-    li $t2, 0
+    lw $t0, n                        # Load n into $t0
+    la $t1, array                    # Load the address of array into $t1
+    li $t2, 0                        # Initialize loop counter $t2 to 0
 
 print_loop:
-    # If counter equals the number of elements, end print loop
-    beq $t2, $t0, end_print
-    # Load the current element of the array into $a0
-    lw $a0, 0($t1)
-    # Print the integer
-    li $v0, 1
-    syscall
+    beq $t2, $t0, end_print          # If loop counter equals n, end loop
+    lw $a0, 0($t1)                   # Load current array element into $a0
+    li $v0, 1                        # Prepare for print integer syscall
+    syscall                          # Print integer
 
-    # Move to the next element
-    addi $t1, $t1, 4
-    # Increment the counter
-    addi $t2, $t2, 1
+    addi $t1, $t1, 4                 # Move to the next array element
+    addi $t2, $t2, 1                 # Increment loop counter
 
-    # If not the last element, print a comma
-    bge $t2, $t0, end_comma
-    la $a0, comma
-    li $v0, 4
-    syscall
+    bge $t2, $t0, end_comma          # If loop counter >= n, skip comma
+    la $a0, comma                    # Load comma address into $a0
+    li $v0, 4                        # Prepare for print string syscall
+    syscall                          # Print comma
 end_comma:
-    # Continue printing
-    j print_loop
+    j print_loop                     # Jump back to start of print loop
 
 end_print:
-    # Print newline
-    la $a0, newline
-    li $v0, 4
-    syscall
+    la $a0, newline                  # Load newline address into $a0
+    li $v0, 4                        # Prepare for print string syscall
+    syscall                          # Print newline
 
-    # Start quicksort
-    la $a0, array  # Load base address of the array
-    li $a1, 0  # Start index
-    lw $a2, n  # Load number of elements
-    sub $a2, $a2, 1  # End index
-    jal quicksort
+    la $a0, array                    # Load array address into $a0
+    li $a1, 0                        # Set left index $a1 to 0
+    lw $a2, n                        # Load array size into $a2
+    sub $a2, $a2, 1                  # Set right index $a2 to n-1
+    jal quicksort                    # Call quicksort function
 
-    # Print the sorted array
-    lw $t0, n  # Load the number of elements
-    la $t1, array  # Load the base address of the array
-    li $t2, 0  # Initialize the counter to 0
+    lw $t0, n                        # Load n into $t0
+    la $t1, array                    # Load the address of array into $t1
+    li $t2, 0                        # Initialize loop counter $t2 to 0
 
 print_sorted_loop:
-    # If counter equals the number of elements, end print loop
-    beq $t2, $t0, end_print_sorted
-    # Load the current element of the array into $a0
-    lw $a0, 0($t1)
-    # Print the integer
-    li $v0, 1
-    syscall
+    beq $t2, $t0, end_print_sorted   # If loop counter equals n, end loop
+    lw $a0, 0($t1)                   # Load current array element into $a0
+    li $v0, 1                        # Prepare for print integer syscall
+    syscall                          # Print integer
 
-    # Move to the next element
-    addi $t1, $t1, 4
-    # Increment the counter
-    addi $t2, $t2, 1
+    addi $t1, $t1, 4                 # Move to the next array element
+    addi $t2, $t2, 1                 # Increment loop counter
 
-    # If not the last element, print a comma
-    bge $t2, $t0, end_comma_sorted
-    la $a0, comma
-    li $v0, 4
-    syscall
+    bge $t2, $t0, end_comma_sorted   # If loop counter >= n, skip comma
+    la $a0, comma                    # Load comma address into $a0
+    li $v0, 4                        # Prepare for print string syscall
+    syscall                          # Print comma
 end_comma_sorted:
-    # Continue printing
-    j print_sorted_loop
+    j print_sorted_loop              # Jump back to start of print loop
 
 end_print_sorted:
-    # Print newline
-    la $a0, newline
-    li $v0, 4
-    syscall
+    la $a0, newline                  # Load newline address into $a0
+    li $v0, 4                        # Prepare for print string syscall
+    syscall                          # Print newline
 
-    # Exit the program
-    li $v0, 10
-    syscall
+    li $v0, 10                       # Prepare for exit syscall
+    syscall                          # Exit program
 
 quicksort:
-    # Save the return address and arguments on the stack
-    addi $sp, $sp, -24
-    sw $ra, 20($sp)
-    sw $a0, 16($sp)
-    sw $a1, 12($sp)
-    sw $a2, 8($sp)
-    sw $a3, 4($sp)
+    addi $sp, $sp, -24               # Allocate stack space
+    sw $ra, 20($sp)                  # Save return address
+    sw $a0, 16($sp)                  # Save array base address
+    sw $a1, 12($sp)                  # Save left index
+    sw $a2, 8($sp)                   # Save right index
+    sw $a3, 4($sp)                   # Save register $a3 (unused)
 
-    # Base case: if start index >= end index, return
-    bge $a1, $a2, quicksort_done
+    bge $a1, $a2, quicksort_done     # If left index >= right index, done
 
-    # Partition the array
-    move $t0, $a1  # i = start
-    move $t1, $a2  # j = end
-    sll $t2, $a1, 2  # i * 4
-    add $t2, $a0, $t2  # array[i]
-    lw $t3, 0($t2)  # pivot = array[start]
+    move $t0, $a1                    # Set $t0 to left index
+    move $t1, $a2                    # Set $t1 to right index
+    sll $t2, $a1, 2                  # $t2 = left index * 4 (word size)
+    add $t2, $a0, $t2                # $t2 = array base + $t2
+    lw $t3, 0($t2)                   # Load pivot value
 
 partition_loop:
 partition_left:
-    # Find element >= pivot
-    sll $t4, $t0, 2
-    add $t5, $a0, $t4
-    lw $t6, 0($t5)
-    bge $t6, $t3, partition_left_done
-    addi $t0, $t0, 1
-    j partition_left
+    sll $t4, $t0, 2                  # $t4 = $t0 * 4 (word size)
+    add $t5, $a0, $t4                # $t5 = array base + $t4
+    lw $t6, 0($t5)                   # Load array value at $t0
+    bge $t6, $t3, partition_left_done # If array value >= pivot, done
+    addi $t0, $t0, 1                 # Increment left index
+    j partition_left                 # Jump back to partition_left
 partition_left_done:
 
 partition_right:
-    # Find element <= pivot
-    sll $t7, $t1, 2
-    add $t8, $a0, $t7
-    lw $t9, 0($t8)
-    ble $t9, $t3, partition_right_done
-    subi $t1, $t1, 1
-    j partition_right
+    sll $t7, $t1, 2                  # $t7 = $t1 * 4 (word size)
+    add $t8, $a0, $t7                # $t8 = array base + $t7
+    lw $t9, 0($t8)                   # Load array value at $t1
+    ble $t9, $t3, partition_right_done # If array value <= pivot, done
+    subi $t1, $t1, 1                 # Decrement right index
+    j partition_right                # Jump back to partition_right
 partition_right_done:
 
-    # If i <= j, swap elements
-    ble $t0, $t1, swap
-    # If i > j, partition is done
-    bgt $t0, $t1, partition_done
+    ble $t0, $t1, swap               # If left index <= right index, swap
+    bgt $t0, $t1, partition_done     # If left index > right index, done
 
 swap:
-    # Swap elements at i and j
-    sll $t4, $t0, 2
-    add $t5, $a0, $t4
-    lw $t6, 0($t5)
+    sll $t4, $t0, 2                  # $t4 = $t0 * 4 (word size)
+    add $t5, $a0, $t4                # $t5 = array base + $t4
+    lw $t6, 0($t5)                   # Load array value at $t0
 
-    sll $t7, $t1, 2
-    add $t8, $a0, $t7
-    lw $t9, 0($t8)
+    sll $t7, $t1, 2                  # $t7 = $t1 * 4 (word size)
+    add $t8, $a0, $t7                # $t8 = array base + $t7
+    lw $t9, 0($t8)                   # Load array value at $t1
 
-    sw $t9, 0($t5)
+    sw $t9, 0($t5)                   # Swap values
     sw $t6, 0($t8)
 
-    addi $t0, $t0, 1
-    subi $t1, $t1, 1
-    j partition_loop
+    addi $t0, $t0, 1                 # Increment left index
+    subi $t1, $t1, 1                 # Decrement right index
+    j partition_loop                 # Jump back to partition_loop
 
 partition_done:
-    # Recursively sort the left subarray
-    move $a2, $t1
-    jal quicksort
+    move $a2, $t1                    # Set right index for left partition
+    jal quicksort                    # Recursively sort left partition
 
-    # Recursively sort the right subarray
-    move $a1, $t0
-    lw $a2, 8($sp)
-    jal quicksort
+    move $a1, $t0                    # Set left index for right partition
+    lw $a2, 8($sp)                   # Load saved right index
+    jal quicksort                    # Recursively sort right partition
 
 quicksort_done:
-    # Restore the saved registers
-    lw $a3, 4($sp)
-    lw $a2, 8($sp)
-    lw $a1, 12($sp)
-    lw $a0, 16($sp)
-    lw $ra, 20($sp)
-    addi $sp, $sp, 24
-    jr $ra
+    lw $a3, 4($sp)                   # Restore $a3
+    lw $a2, 8($sp)                   # Restore right index
+    lw $a1, 12($sp)                  # Restore left index
+    lw $a0, 16($sp)                  # Restore array base address
+    lw $ra, 20($sp)                  # Restore return address
+    addi $sp, $sp, 24                # Deallocate stack space
+    jr $ra                           # Return from function
